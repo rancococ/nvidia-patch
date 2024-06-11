@@ -26,13 +26,14 @@ DESCRIPTION
        -d VERSION     Use VERSION driver version when looking for libraries
                       instead of using nvidia-smi to detect it.
        -f             Enable support for Flatpak NVIDIA drivers.
+       -j             Output the patch list to stdout as JSON
 '
 }
 
 # shellcheck disable=SC2209
 opmode="patch"
 
-while getopts 'rshc:ld:f' flag; do
+while getopts 'rshjc:ld:f' flag; do
     case "${flag}" in
         r) opmode="${opmode}rollback" ;;
         s) silent_flag='true' ;;
@@ -41,6 +42,7 @@ while getopts 'rshc:ld:f' flag; do
         l) opmode="${opmode}listversions" ;;
         d) manual_driver_version="$OPTARG" ;;
         f) flatpak_flag='true' ;;
+        j) opmode="dump" ;;
         *) echo "Incorrect option specified in command line" ; exit 2 ;;
     esac
 done
@@ -55,7 +57,6 @@ if [[ $flatpak_flag ]]; then
 fi
 
 declare -A patch_list=(
-    ["435.27.08"]='s/\x85\xc0\x89\xc3\x0f\x85\x68\xfa\xff\xff/\x31\xc0\x89\xc3\x0f\x85\x68\xfa\xff\xff/'
     ["440.26"]='s/\x85\xc0\x89\xc3\x0f\x85\xa9\xfa\xff\xff/\x31\xc0\x89\xc3\x0f\x85\xa9\xfa\xff\xff/'
     ["440.31"]='s/\x85\xc0\x89\xc3\x0f\x85\xa9\xfa\xff\xff/\x31\xc0\x89\xc3\x0f\x85\xa9\xfa\xff\xff/'
     ["440.33.01"]='s/\x85\xc0\x89\xc3\x0f\x85\xa9\xfa\xff\xff/\x31\xc0\x89\xc3\x0f\x85\xa9\xfa\xff\xff/'
@@ -139,6 +140,8 @@ declare -A patch_list=(
     ["470.161.03"]='s/\x83\xfe\x01\x73\x08\x48/\x83\xfe\x00\x72\x08\x48/'
     ["470.182.03"]='s/\x83\xfe\x01\x73\x08\x48/\x83\xfe\x00\x72\x08\x48/'
     ["470.199.02"]='s/\x83\xfe\x01\x73\x08\x48/\x83\xfe\x00\x72\x08\x48/'
+    ["470.223.02"]='s/\x83\xfe\x01\x73\x08\x48/\x83\xfe\x00\x72\x08\x48/'
+    ["470.239.06"]='s/\x83\xfe\x01\x73\x08\x48/\x83\xfe\x00\x72\x08\x48/'
     ["495.29.05"]='s/\x83\xfe\x01\x73\x08\x48/\x83\xfe\x00\x72\x08\x48/'
     ["495.44"]='s/\x83\xfe\x01\x73\x08\x48/\x83\xfe\x00\x72\x08\x48/'
     ["495.46"]='s/\x83\xfe\x01\x73\x08\x48/\x83\xfe\x00\x72\x08\x48/'
@@ -170,9 +173,11 @@ declare -A patch_list=(
     ["525.116.03"]='s/\x83\xfe\x01\x73\x08\x48/\x83\xfe\x00\x72\x08\x48/'
     ["525.116.04"]='s/\x83\xfe\x01\x73\x08\x48/\x83\xfe\x00\x72\x08\x48/'
     ["525.125.06"]='s/\x83\xfe\x01\x73\x08\x48/\x83\xfe\x00\x72\x08\x48/'
+    ["525.147.05"]='s/\x83\xfe\x01\x73\x08\x48/\x83\xfe\x00\x72\x08\x48/'
     ["530.30.02"]='s/\x83\xfe\x01\x73\x08\x48/\x83\xfe\x00\x72\x08\x48/'
     ["530.41.03"]='s/\x83\xfe\x01\x73\x08\x48/\x83\xfe\x00\x72\x08\x48/'
     ["535.43.02"]='s/\x83\xfe\x01\x73\x08\x48/\x83\xfe\x00\x72\x08\x48/'
+    ["535.43.25"]='s/\x83\xfe\x01\x73\x08\x48/\x83\xfe\x00\x72\x08\x48/'
     ["535.54.03"]='s/\x83\xfe\x01\x73\x08\x48/\x83\xfe\x00\x72\x08\x48/'
     ["535.86.05"]='s/\x83\xfe\x01\x73\x08\x48/\x83\xfe\x01\x90\x90\x48/'
     ["535.86.10"]='s/\x83\xfe\x01\x73\x08\x48/\x83\xfe\x01\x90\x90\x48/'
@@ -180,141 +185,28 @@ declare -A patch_list=(
     ["535.104.05"]='s/\x83\xfe\x01\x73\x08\x48/\x83\xfe\x01\x90\x90\x48/'
     ["535.104.12"]='s/\x83\xfe\x01\x73\x08\x48/\x83\xfe\x01\x90\x90\x48/'
     ["535.113.01"]='s/\x83\xfe\x01\x73\x08\x48/\x83\xfe\x01\x90\x90\x48/'
+    ["535.129.03"]='s/\x83\xfe\x01\x73\x08\x48/\x83\xfe\x01\x90\x90\x48/'
+    ["535.146.02"]='s/\x83\xfe\x01\x73\x08\x48/\x83\xfe\x01\x90\x90\x48/'
+    ["535.154.05"]='s/\x83\xfe\x01\x73\x08\x48/\x83\xfe\x01\x90\x90\x48/'
+    ["535.161.07"]='s/\x83\xfe\x01\x73\x08\x48/\x83\xfe\x01\x90\x90\x48/'
+    ["535.161.08"]='s/\x83\xfe\x01\x73\x08\x48/\x83\xfe\x01\x90\x90\x48/'
+    ["535.171.04"]='s/\x83\xfe\x01\x73\x08\x48/\x83\xfe\x01\x90\x90\x48/'
     ["545.23.06"]='s/\x83\xfe\x01\x73\x08\x48/\x83\xfe\x01\x90\x90\x48/'
-)
-
-declare -A object_list=(
-    ["435.27.08"]='libnvidia-fbc.so'
-    ["440.26"]='libnvidia-fbc.so'
-    ["440.31"]='libnvidia-fbc.so'
-    ["440.33.01"]='libnvidia-fbc.so'
-    ["440.36"]='libnvidia-fbc.so'
-    ["440.43.01"]='libnvidia-fbc.so'
-    ["440.44"]='libnvidia-fbc.so'
-    ["440.48.02"]='libnvidia-fbc.so'
-    ["440.58.01"]='libnvidia-fbc.so'
-    ["440.58.02"]='libnvidia-fbc.so'
-    ["440.59"]='libnvidia-fbc.so'
-    ["440.64"]='libnvidia-fbc.so'
-    ["440.64.00"]='libnvidia-fbc.so'
-    ["440.66.02"]='libnvidia-fbc.so'
-    ["440.66.03"]='libnvidia-fbc.so'
-    ["440.66.04"]='libnvidia-fbc.so'
-    ["440.66.08"]='libnvidia-fbc.so'
-    ["440.66.09"]='libnvidia-fbc.so'
-    ["440.66.11"]='libnvidia-fbc.so'
-    ["440.66.12"]='libnvidia-fbc.so'
-    ["440.66.14"]='libnvidia-fbc.so'
-    ["440.66.15"]='libnvidia-fbc.so'
-    ["440.66.17"]='libnvidia-fbc.so'
-    ["440.82"]='libnvidia-fbc.so'
-    ["440.95.01"]='libnvidia-fbc.so'
-    ["440.100"]='libnvidia-fbc.so'
-    ["440.118.02"]='libnvidia-fbc.so'
-    ["450.36.06"]='libnvidia-fbc.so'
-    ["450.51"]='libnvidia-fbc.so'
-    ["450.51.05"]='libnvidia-fbc.so'
-    ["450.51.06"]='libnvidia-fbc.so'
-    ["450.56.01"]='libnvidia-fbc.so'
-    ["450.56.02"]='libnvidia-fbc.so'
-    ["450.56.06"]='libnvidia-fbc.so'
-    ["450.56.11"]='libnvidia-fbc.so'
-    ["450.57"]='libnvidia-fbc.so'
-    ["450.66"]='libnvidia-fbc.so'
-    ["450.80.02"]='libnvidia-fbc.so'
-    ["455.23.04"]='libnvidia-fbc.so'
-    ["455.23.05"]='libnvidia-fbc.so'
-    ["455.26.01"]='libnvidia-fbc.so'
-    ["455.26.02"]='libnvidia-fbc.so'
-    ["455.28"]='libnvidia-fbc.so'
-    ["455.32.00"]='libnvidia-fbc.so'
-    ["455.38"]='libnvidia-fbc.so'
-    ["455.45.01"]='libnvidia-fbc.so'
-    ["455.46.01"]='libnvidia-fbc.so'
-    ["455.46.02"]='libnvidia-fbc.so'
-    ["455.46.04"]='libnvidia-fbc.so'
-    ["455.50.02"]='libnvidia-fbc.so'
-    ["455.50.03"]='libnvidia-fbc.so'
-    ["455.50.04"]='libnvidia-fbc.so'
-    ["455.50.05"]='libnvidia-fbc.so'
-    ["455.50.07"]='libnvidia-fbc.so'
-    ["455.50.10"]='libnvidia-fbc.so'
-    ["460.27.04"]='libnvidia-fbc.so'
-    ["460.32.03"]='libnvidia-fbc.so'
-    ["460.39"]='libnvidia-fbc.so'
-    ["460.56"]='libnvidia-fbc.so'
-    ["460.67"]='libnvidia-fbc.so'
-    ["460.73.01"]='libnvidia-fbc.so'
-    ["460.80"]='libnvidia-fbc.so'
-    ["460.84"]='libnvidia-fbc.so'
-    ["460.91.03"]='libnvidia-fbc.so'
-    ["465.19.01"]='libnvidia-fbc.so'
-    ["465.24.02"]='libnvidia-fbc.so'
-    ["465.27"]='libnvidia-fbc.so'
-    ["465.31"]='libnvidia-fbc.so'
-    ["470.42.01"]='libnvidia-fbc.so'
-    ["470.57.02"]='libnvidia-fbc.so'
-    ["470.62.02"]='libnvidia-fbc.so'
-    ["470.62.05"]='libnvidia-fbc.so'
-    ["470.63.01"]='libnvidia-fbc.so'
-    ["470.74"]='libnvidia-fbc.so'
-    ["470.82.00"]='libnvidia-fbc.so'
-    ["470.82.01"]='libnvidia-fbc.so'
-    ["470.86"]='libnvidia-fbc.so'
-    ["470.94"]='libnvidia-fbc.so'
-    ["470.103.01"]='libnvidia-fbc.so'
-    ["470.129.06"]='libnvidia-fbc.so'
-    ["470.141.03"]='libnvidia-fbc.so'
-    ["470.161.03"]='libnvidia-fbc.so'
-    ["470.182.03"]='libnvidia-fbc.so'
-    ["470.199.02"]='libnvidia-fbc.so'
-    ["495.29.05"]='libnvidia-fbc.so'
-    ["495.44"]='libnvidia-fbc.so'
-    ["495.46"]='libnvidia-fbc.so'
-    ["510.39.01"]='libnvidia-fbc.so'
-    ["510.47.03"]='libnvidia-fbc.so'
-    ["510.54"]='libnvidia-fbc.so'
-    ["510.60.02"]='libnvidia-fbc.so'
-    ["510.68.02"]='libnvidia-fbc.so'
-    ["510.73.05"]='libnvidia-fbc.so'
-    ["510.73.08"]='libnvidia-fbc.so'
-    ["510.85.02"]='libnvidia-fbc.so'
-    ["510.108.03"]='libnvidia-fbc.so'
-    ["515.43.04"]='libnvidia-fbc.so'
-    ["515.48.07"]='libnvidia-fbc.so'
-    ["515.57"]='libnvidia-fbc.so'
-    ["515.65.01"]='libnvidia-fbc.so'
-    ["515.76"]='libnvidia-fbc.so'
-    ["515.86.01"]='libnvidia-fbc.so'
-    ["515.105.01"]='libnvidia-fbc.so'
-    ["520.56.06"]='libnvidia-fbc.so'
-    ["520.61.05"]='libnvidia-fbc.so'
-    ["525.60.11"]='libnvidia-fbc.so'
-    ["525.60.13"]='libnvidia-fbc.so'
-    ["525.78.01"]='libnvidia-fbc.so'
-    ["525.85.05"]='libnvidia-fbc.so'
-    ["525.85.12"]='libnvidia-fbc.so'
-    ["525.89.02"]='libnvidia-fbc.so'
-    ["525.105.17"]='libnvidia-fbc.so'
-    ["525.116.03"]='libnvidia-fbc.so'
-    ["525.116.04"]='libnvidia-fbc.so'
-    ["525.125.06"]='libnvidia-fbc.so'
-    ["530.30.02"]='libnvidia-fbc.so'
-    ["530.41.03"]='libnvidia-fbc.so'
-    ["535.43.02"]='libnvidia-fbc.so'
-    ["535.54.03"]='libnvidia-fbc.so'
-    ["535.86.05"]='libnvidia-fbc.so'
-    ["535.86.10"]='libnvidia-fbc.so'
-    ["535.98"]='libnvidia-fbc.so'
-    ["535.104.05"]='libnvidia-fbc.so'
-    ["535.104.12"]='libnvidia-fbc.so'
-    ["535.113.01"]='libnvidia-fbc.so'
-    ["545.23.06"]='libnvidia-fbc.so'
+    ["545.23.08"]='s/\x83\xfe\x01\x73\x08\x48/\x83\xfe\x01\x90\x90\x48/'
+    ["545.29.02"]='s/\x83\xfe\x01\x73\x08\x48/\x83\xfe\x01\x90\x90\x48/'
+    ["545.29.06"]='s/\x83\xfe\x01\x73\x08\x48/\x83\xfe\x01\x90\x90\x48/'
+    ["550.40.07"]='s/\x83\xfe\x01\x73\x08\x48/\x83\xfe\x01\x90\x90\x48/'
+    ["550.54.14"]='s/\x83\xfe\x01\x73\x08\x48/\x83\xfe\x01\x90\x90\x48/'
+    ["550.54.15"]='s/\x83\xfe\x01\x73\x08\x48/\x83\xfe\x01\x90\x90\x48/'
+    ["550.67"]='s/\x83\xfe\x01\x73\x08\x48/\x83\xfe\x01\x90\x90\x48/'
+    ["550.76"]='s/\x83\xfe\x01\x73\x08\x48/\x83\xfe\x01\x90\x90\x48/'
+    ["550.78"]='s/\x83\xfe\x01\x73\x08\x48/\x83\xfe\x01\x90\x90\x48/'
+    ["555.42.02"]='s/\x83\xfe\x01\x73\x08\x48/\x83\xfe\x01\x90\x90\x48/'
 )
 
 check_version_supported () {
     local ver="$1"
-    [[ "${patch_list[$ver]+isset}" && "${object_list[$ver]+isset}" ]]
+    [[ "${patch_list[$ver]+isset}" ]]
 }
 
 get_flatpak_driver_path () {
@@ -331,7 +223,7 @@ get_flatpak_driver_path () {
 
 get_supported_versions () {
     for drv in "${!patch_list[@]}"; do
-        [[ "${object_list[$drv]+isset}" ]] && echo "$drv"
+        echo "$drv"
     done | sort -t. -n
     return 0
 }
@@ -370,7 +262,7 @@ patch_common () {
     fi
 
     patch="${patch_list[$driver_version]}"
-    object="${object_list[$driver_version]}"
+    object='libnvidia-fbc.so'
 
     if [[ $flatpak_flag ]]; then
         driver_dir=$(get_flatpak_driver_path "$driver_version")
@@ -469,12 +361,22 @@ list_supported_versions () {
     get_supported_versions
 }
 
+dump_patches () {
+    for i in "${!patch_list[@]}"
+    do
+        echo "$i"
+        echo "${patch_list[$i]}"
+    done |
+    jq --sort-keys -n -R 'reduce inputs as $i ({}; . + { ($i): (input|(tonumber? // .)) })'
+}
+
 case "${opmode}" in
     patch) patch ;;
     patchrollback) rollback ;;
     patchhelp) print_usage ; exit 2 ;;
     patchcheckversion) query_version_support ;;
     patchlistversions) list_supported_versions ;;
+    dump) dump_patches ;;
     *) echo "Incorrect combination of flags. Use option -h to get help."
        exit 2 ;;
 esac
